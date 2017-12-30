@@ -442,7 +442,7 @@ NS_DESIGNATED_INITIALIZER
 
 - (BOOL)extractFilesTo:(NSString *)filePath
              overwrite:(BOOL)overwrite
-              progress:(void (^)(URKFileInfo *currentFile, CGFloat percentArchiveDecompressed))progressBlock
+              progress:(BOOL (^)(URKFileInfo *currentFile, CGFloat percentArchiveDecompressed))progressBlock
                  error:(NSError * __autoreleasing *)error
 {
     URKCreateActivity("Extracting Files to Directory");
@@ -525,7 +525,14 @@ NS_DESIGNATED_INITIALIZER
 #pragma clang diagnostic ignored "-Wdouble-promotion"
                 // I would change the signature of this block, but it's been deprecated already,
                 // so it'll just get dropped eventually, and it made sense to silence the warning
-                progressBlock(fileInfo, bytesDecompressed / totalSize.floatValue);
+                BOOL continueFlag = progressBlock(fileInfo, bytesDecompressed / totalSize.floatValue);
+                if (!continueFlag) {
+                    NSString *errorName = nil;
+                    [self assignError:innerError code:URKErrorCodeUserCancelled errorName:&errorName];
+                    URKLogInfo("Halted file extraction due to user cancellation: %{public}@", errorName);
+                    result = NO;
+                    return;
+                }
 #pragma clang diagnostic pop
             }
 

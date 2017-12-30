@@ -325,7 +325,7 @@ extern NSString *URKErrorDomain;
  */
 - (BOOL)extractFilesTo:(NSString *)filePath
              overwrite:(BOOL)overwrite
-              progress:(nullable void (^)(URKFileInfo *currentFile, CGFloat percentArchiveDecompressed))progressBlock
+              progress:(nullable BOOL (^)(URKFileInfo *currentFile, CGFloat percentArchiveDecompressed))progressBlock
                  error:(NSError **)error __deprecated_msg("Use -extractFilesTo:overwrite:error: instead, and if using the progress block, replace with NSProgress as described in the README");
 
 /**
